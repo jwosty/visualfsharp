@@ -6,6 +6,35 @@
     <OutputType>Exe</OutputType>
     <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
     <UsePackageTargetFallbackHack>true</UsePackageTargetFallbackHack>
+    <RootNamespace>LanguageServiceProfiling</RootNamespace>
+    <AssemblyName>LanguageServiceProfiling</AssemblyName>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFSharpCoreVersion>4.4.3.0</TargetFSharpCoreVersion>
+    <Name>LanguageServiceProfiling</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <Tailcalls>false</Tailcalls>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <DocumentationFile>
+    </DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <Tailcalls>true</Tailcalls>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <DocumentationFile>
+    </DocumentationFile>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>

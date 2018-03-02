@@ -650,6 +650,28 @@ if "%NEEDS_DOTNET_CLI_TOOLS%" == "1" (
     :: Restore the Tools directory
     call %~dp0init-tools.cmd
 )
+
+echo ----------- Done with package restore, starting dependency uptake check -------------
+
+if not "%PB_PackageVersionPropsUrl%" == "" (
+    set dependencyUptakeDir=%~dp0Tools\dependencyUptake
+    if not exist "!dependencyUptakeDir!" mkdir "!dependencyUptakeDir!"
+
+    :: download package version overrides
+    echo powershell -noprofile -executionPolicy RemoteSigned -command "Invoke-WebRequest -Uri '%PB_PackageVersionPropsUrl%' -OutFile '!dependencyUptakeDir!\PackageVersions.props'"
+         powershell -noprofile -executionPolicy RemoteSigned -command "Invoke-WebRequest -Uri '%PB_PackageVersionPropsUrl%' -OutFile '!dependencyUptakeDir!\PackageVersions.props'"
+    if ERRORLEVEL 1 echo Error downloading package version properties && goto :failure
+
+    :: prepare dependency uptake files
+    echo %_msbuildexe% %msbuildflags% %~dp0build\projects\PrepareDependencyUptake.proj /t:Build
+         %_msbuildexe% %msbuildflags% %~dp0build\projects\PrepareDependencyUptake.proj /t:Build
+    if ERRORLEVEL 1 echo Error building dependency uptake files && goto :failure
+
+    :: restore dependencies
+    %_nugetexe% restore !dependencyUptakeDir!\packages.config -PackagesDirectory packages -ConfigFile !dependencyUptakeDir!\NuGet.config
+    if ERRORLEVEL 1 echo Error restoring dependency uptake packages && goto :failure
+)
+
 set _dotnetcliexe=%~dp0Tools\dotnetcli\dotnet.exe
 set _dotnet20exe=%~dp0Tools\dotnet20\dotnet.exe
 set NUGET_PACKAGES=%~dp0Packages
@@ -739,13 +761,26 @@ if "%BUILD_PHASE%" == "1" (
    @if ERRORLEVEL 1 echo Error build failed && goto :failure
 )
 
-echo ---------------- Done with build, starting assembly signing ---------------
+echo ---------------- Done with build, starting assembly version checks ---------------
+set asmvercheckpath=%~dp0tests\fsharpqa\testenv\src\AssemblyVersionCheck
+
+echo "%~dp0%BUILD_CONFIG%\net40\bin\fsi.exe" %asmvercheckpath%\AssemblyVersionCheck.fsx -- "%~dp0build\config\AssemblySignToolData.json" "%~dp0%BUILD_CONFIG%"
+     "%~dp0%BUILD_CONFIG%\net40\bin\fsi.exe" %asmvercheckpath%\AssemblyVersionCheck.fsx -- "%~dp0build\config\AssemblySignToolData.json" "%~dp0%BUILD_CONFIG%"
+if ERRORLEVEL 1 echo Error verifying assembly versions and commit hashes. && goto :failure
+
+echo ---------------- Done with assembly version checks, starting assembly signing ---------------
 
 if not "%SIGN_TYPE%" == "" (
     echo build\scripts\run-signtool.cmd -MSBuild %_msbuildexe% -SignType %SIGN_TYPE% -ConfigFile build\config\AssemblySignToolData.json
     call build\scripts\run-signtool.cmd -MSBuild %_msbuildexe% -SignType %SIGN_TYPE% -ConfigFile build\config\AssemblySignToolData.json
     if ERRORLEVEL 1 echo Error running sign tool && goto :failure
 )
+
+echo ---------------- Done with assembly signing, start package creation ---------------
+
+echo %_msbuildexe% %msbuildflags% build-nuget-packages.proj /p:Configuration=%BUILD_CONFIG%
+     %_msbuildexe% %msbuildflags% build-nuget-packages.proj /p:Configuration=%BUILD_CONFIG%
+if ERRORLEVEL 1 echo Error building NuGet packages && goto :failure
 
 if "%BUILD_SETUP%" == "1" (
     echo %_msbuildexe% %msbuildflags% setup\build-msi.proj /p:Configuration=%BUILD_CONFIG%

@@ -7,6 +7,24 @@
     <TargetFramework>net46</TargetFramework>
     <OutputType>Library</OutputType>
     <ExtensionInstallationFolder>Microsoft\FSharpTemplates</ExtensionInstallationFolder>
+    <OutputPath>$(RootBinPath)</OutputPath>
+    <UseVsMicroBuildAssemblyVersion>true</UseVsMicroBuildAssemblyVersion>
+    <MicroBuildAssemblyFileLanguage>cs</MicroBuildAssemblyFileLanguage>
+    <DeployExtension>false</DeployExtension>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DevEnvDir)devenv.exe</StartProgram>
+    <StartArguments>/rootsuffix $(VSRootSuffix) /log</StartArguments>
+    <VSSDKTargetPlatformRegRootSuffix>$(VSRootSuffix)</VSSDKTargetPlatformRegRootSuffix>
+    <CreateVsixContainer>true</CreateVsixContainer>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <StartAction>Program</StartAction>
+    <StartProgram>$(DevEnvDir)devenv.exe</StartProgram>
+    <CreateVsixContainer>true</CreateVsixContainer>
+    <StartArguments>/rootsuffix $(VSRootSuffix) /log</StartArguments>
+    <VSSDKTargetPlatformRegRootSuffix>$(VSRootSuffix)</VSSDKTargetPlatformRegRootSuffix>
   </PropertyGroup>
 
   <ItemGroup>
